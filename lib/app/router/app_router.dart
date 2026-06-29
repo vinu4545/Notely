@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/home/screens/home_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';

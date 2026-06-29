@@ -1,21 +1,21 @@
 class AppRoutes {
   AppRoutes._();
 
-  static const splash = "/";
+  static const splash = '/';
 
-  static const home = "/home";
+  static const home = '/home';
 
-  static const editor = "/editor";
+  static const onboarding = '/onboarding';
 
-  static const onboarding = "/onboarding";
+  static const editor = '/editor';
 
-  static const search = "/search";
+  static const search = '/search';
 
-  static const settings = "/settings";
+  static const settings = '/settings';
 
-  static const profile = "/profile";
+  static const profile = '/profile';
 
-  static const archive = "/archive";
+  static const archive = '/archive';
 
-  static const trash = "/trash";
+  static const trash = '/trash';
 }
