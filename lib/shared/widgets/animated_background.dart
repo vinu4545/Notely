@@ -5,21 +5,15 @@ import '../../app/theme/app_gradients.dart';
 class AnimatedBackground extends StatelessWidget {
   final Widget child;
 
-  const AnimatedBackground({
-    super.key,
-    required this.child,
-  });
+  const AnimatedBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-
         // Background Gradient
         const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: AppGradients.primary,
-          ),
+          decoration: BoxDecoration(gradient: AppGradients.primary),
           child: SizedBox.expand(),
         ),
 
@@ -32,7 +26,7 @@ class AnimatedBackground extends StatelessWidget {
             height: 260,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withOpacity(.10),
+              color: Colors.white.withAlpha((.10 * 255).round()),
             ),
           ),
         ),
@@ -46,7 +40,7 @@ class AnimatedBackground extends StatelessWidget {
             height: 320,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withOpacity(.08),
+              color: Colors.white.withAlpha((.08 * 255).round()),
             ),
           ),
         ),

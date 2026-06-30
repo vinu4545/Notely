@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_gradients.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,175 +15,140 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-
   late final Animation<double> _fadeAnimation;
-
   late final Animation<double> _scaleAnimation;
+  late final Timer _navigationTimer;
 
   @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _scaleAnimation = Tween<double>(
-      begin: 0.85,
+      begin: 0.8,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutBack,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
-
-    Timer(
-      const Duration(seconds: 3),
-      () {
-        if (!mounted) return;
-
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.home,
-        );
-      },
-    );
+    _navigationTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _navigationTimer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: AppGradients.primary,
-            ),
-          ),
-
-          Positioned(
-            top: -120,
-            right: -90,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(.08),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppGradients.primary),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -120,
+              right: -120,
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withAlpha((.11 * 255).round()),
+                ),
               ),
             ),
-          ),
-
-          Positioned(
-            bottom: -120,
-            left: -100,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(.08),
+            Positioned(
+              bottom: -80,
+              left: -100,
+              child: Container(
+                width: 260,
+                height: 260,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withAlpha((.08 * 255).round()),
+                ),
               ),
             ),
-          ),
-
-          SafeArea(
-            child: Center(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Hero(
-                        tag: 'logo',
-                        child: Image.asset(
-                          'assets/logo.png',
-                          width: 170,
-                          height: 170,
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      const Text(
-                        'NOTELY',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 4,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      const Text(
-                        'Capture Ideas Beautifully',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 18,
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.15),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(.25),
+            SafeArea(
+              child: Center(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Hero(
+                          tag: 'logo',
+                          child: Container(
+                            width: 140,
+                            height: 140,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFFB8D4), Color(0xFFFF7A5B)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(32),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 28,
+                                  offset: Offset(0, 14),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'N',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 72,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Think.\nCreate.\nOrganize.',
-                          textAlign: TextAlign.center,
+                        const SizedBox(height: 28),
+                        const Text(
+                          'Notely',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
-                            height: 1.7,
+                            fontSize: 42,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 2,
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 50),
-
-                      const Text(
-                        'Crafted with ❤️ in Flutter',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
+                        const SizedBox(height: 14),
+                        const Text(
+                          'A premium note workspace for modern teams.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            height: 1.6,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
