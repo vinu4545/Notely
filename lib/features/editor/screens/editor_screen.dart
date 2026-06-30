@@ -26,6 +26,9 @@ class _EditorScreenState extends State<EditorScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _previewMode = false;
   String _category = 'Work';
+  bool _isPinned = false;
+  bool _isFavorite = false;
+  bool _isArchived = false;
 
   @override
   void initState() {
@@ -34,7 +37,13 @@ class _EditorScreenState extends State<EditorScreen> {
     _contentController = TextEditingController(
       text: widget.note?.content ?? '',
     );
+    _contentController.addListener(() {
+      setState(() {});
+    });
     _category = widget.note?.category ?? 'Work';
+    _isPinned = widget.note?.isPinned ?? false;
+    _isFavorite = widget.note?.isFavorite ?? false;
+    _isArchived = widget.note?.isArchived ?? false;
   }
 
   @override
@@ -52,9 +61,9 @@ class _EditorScreenState extends State<EditorScreen> {
       title: _titleController.text.trim(),
       content: _contentController.text.trim(),
       category: _category,
-      isPinned: widget.note?.isPinned ?? false,
-      isFavorite: widget.note?.isFavorite ?? false,
-      isArchived: widget.note?.isArchived ?? false,
+      isPinned: _isPinned,
+      isFavorite: _isFavorite,
+      isArchived: _isArchived,
       isDeleted: widget.note?.isDeleted ?? false,
       createdAt: widget.note?.createdAt,
       updatedAt: DateTime.now(),
@@ -70,6 +79,41 @@ class _EditorScreenState extends State<EditorScreen> {
     setState(() {
       _previewMode = !_previewMode;
     });
+  }
+
+  void _togglePin() {
+    setState(() {
+      _isPinned = !_isPinned;
+    });
+  }
+
+  void _toggleFavorite() {
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+  }
+
+  void _toggleArchive() {
+    setState(() {
+      _isArchived = !_isArchived;
+    });
+  }
+
+  int _getWordCount() {
+    if (_contentController.text.isEmpty) return 0;
+    return _contentController.text
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .length;
+  }
+
+  int _getCharacterCount() {
+    return _contentController.text.length;
+  }
+
+  int _getReadingTime() {
+    final wordCount = _getWordCount();
+    return (wordCount / 180).ceil().clamp(1, 999);
   }
 
   @override
@@ -206,6 +250,33 @@ class _EditorScreenState extends State<EditorScreen> {
                           ],
                         ),
                         const SizedBox(height: 18),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton.outlined(
+                              onPressed: _togglePin,
+                              icon: Icon(
+                                _isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                              ),
+                              tooltip: _isPinned ? 'Unpin note' : 'Pin note',
+                            ),
+                            IconButton.outlined(
+                              onPressed: _toggleFavorite,
+                              icon: Icon(
+                                _isFavorite ? Icons.favorite : Icons.favorite_outline,
+                              ),
+                              tooltip: _isFavorite ? 'Remove from favorites' : 'Add to favorites',
+                            ),
+                            IconButton.outlined(
+                              onPressed: _toggleArchive,
+                              icon: Icon(
+                                _isArchived ? Icons.unarchive : Icons.archive_outlined,
+                              ),
+                              tooltip: _isArchived ? 'Unarchive note' : 'Archive note',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
                         Container(
                           height: 340,
                           padding: const EdgeInsets.all(16),
@@ -239,17 +310,15 @@ class _EditorScreenState extends State<EditorScreen> {
                     children: [
                       _EditorBadge(
                         label: 'Words',
-                        value:
-                            '${_contentController.text.split(RegExp(r'\\s+')).where((word) => word.isNotEmpty).length}',
+                        value: '${_getWordCount()}',
                       ),
                       _EditorBadge(
                         label: 'Characters',
-                        value: '${_contentController.text.length}',
+                        value: '${_getCharacterCount()}',
                       ),
                       _EditorBadge(
                         label: 'Read',
-                        value:
-                            '${(_contentController.text.split(RegExp(r'\\s+')).where((word) => word.isNotEmpty).length / 180).ceil().clamp(1, 999)} min',
+                        value: '${_getReadingTime()} min',
                       ),
                     ],
                   ),
