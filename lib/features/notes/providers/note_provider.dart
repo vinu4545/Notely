@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../core/constants/app_constants.dart';
 import '../../../core/database/database_service.dart';
 import '../models/note_activity.dart';
 import '../models/note_model.dart';
@@ -12,8 +15,16 @@ class NoteProvider extends ChangeNotifier {
   late final DatabaseService _service;
   List<Note> _notes = [];
   List<NoteActivityEntry> _historyEntries = [];
+  List<String> _customCategories = [];
   bool isLoading = true;
   String activeCategory = 'All';
+
+  static const List<String> defaultCategories = [
+    'Work',
+    'Design',
+    'Ideas',
+    'Journal',
+  ];
 
   List<Note> get notes => [..._notes];
 
@@ -34,13 +45,22 @@ class NoteProvider extends ChangeNotifier {
   List<NoteActivityEntry> get historyEntries => [..._historyEntries];
 
   List<String> get categories {
-    return [
-      'All',
-      ...{...activeNotes.map((note) => note.category)},
-    ];
+    final items = <String>{};
+    items.add('All');
+    items.addAll(defaultCategories);
+    items.addAll(_customCategories);
+    items.addAll(activeNotes.map((note) => note.category));
+    return items.toList();
   }
 
+  List<String> get availableCategories {
+    return categories.where((category) => category != 'All').toList();
+  }
+
+  List<String> get customCategories => [..._customCategories];
+
   Future<void> initialize() async {
+    await _loadSavedCategories();
     await _service.ensureSampleNotes();
     await loadNotes();
     await loadHistory();
@@ -56,6 +76,52 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> loadHistory() async {
     _historyEntries = await _service.fetchHistory();
+    notifyListeners();
+  }
+
+  Future<void> _loadSavedCategories() async {
+    final preferences = await SharedPreferences.getInstance();
+    _customCategories =
+        preferences.getStringList(AppConstants.categoryPreferenceKey) ?? [];
+  }
+
+  Future<void> _saveCustomCategories() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setStringList(
+      AppConstants.categoryPreferenceKey,
+      _customCategories,
+    );
+  }
+
+  Future<void> addCategory(String category) async {
+    final normalized = category.trim();
+    if (normalized.isEmpty || normalized == 'All') return;
+    if (defaultCategories.contains(normalized) ||
+        _customCategories.contains(normalized)) {
+      return;
+    }
+    _customCategories.add(normalized);
+    await _saveCustomCategories();
+    notifyListeners();
+  }
+
+  Future<void> removeCategory(String category) async {
+    if (category.isEmpty || defaultCategories.contains(category)) return;
+    _customCategories.remove(category);
+    await _saveCustomCategories();
+
+    final affectedNotes = _notes
+        .where((note) => note.category == category)
+        .toList();
+    for (final note in affectedNotes) {
+      await _service.updateNote(
+        note.copyWith(
+          category: defaultCategories.first,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
+    await loadNotes();
     notifyListeners();
   }
 

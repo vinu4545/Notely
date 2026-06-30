@@ -99,6 +99,196 @@ class _EditorScreenState extends State<EditorScreen> {
     });
   }
 
+  Future<void> _showCategoryDialog(BuildContext context) async {
+    final provider = context.read<NoteProvider>();
+    final controller = TextEditingController();
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 32,
+          ),
+          child: StatefulBuilder(
+            builder: (_, setDialogState) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(17, 19, 24, 0.12),
+                      blurRadius: 24,
+                      offset: Offset(0, 16),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                        vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPink,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                      ),
+                      child: const Text(
+                        'Manage categories',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textWhite,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'Choose a category or add your own.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceWhite,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: TextField(
+                              controller: controller,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Add category',
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final newCategory = controller.text.trim();
+                              if (newCategory.isEmpty) return;
+                              await provider.addCategory(newCategory);
+                              controller.clear();
+                              setDialogState(() {});
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryOrange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Add category'),
+                          ),
+                          const SizedBox(height: 18),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 280),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: provider.availableCategories.map((
+                                  category,
+                                ) {
+                                  final isDefault = NoteProvider
+                                      .defaultCategories
+                                      .contains(category);
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surfaceWhite,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
+                                    ),
+                                    child: ListTile(
+                                      onTap: () => Navigator.of(
+                                        dialogContext,
+                                      ).pop(category),
+                                      title: Text(
+                                        category,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      trailing: isDefault
+                                          ? null
+                                          : IconButton(
+                                              onPressed: () async {
+                                                await provider.removeCategory(
+                                                  category,
+                                                );
+                                                if (_category == category) {
+                                                  setState(() {
+                                                    _category = NoteProvider
+                                                        .defaultCategories
+                                                        .first;
+                                                  });
+                                                }
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: AppColors.error,
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(color: AppColors.primaryPink),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+    if (selected != null) {
+      setState(() {
+        _category = selected;
+      });
+    }
+  }
+
   int _getWordCount() {
     if (_contentController.text.isEmpty) return 0;
     return _contentController.text
@@ -195,36 +385,37 @@ class _EditorScreenState extends State<EditorScreen> {
                           ),
                         ),
                         const SizedBox(height: 18),
-                        DropdownButtonFormField<String>(
-                          initialValue: _category,
-                          decoration: const InputDecoration(
-                            labelText: 'Category',
+                        GestureDetector(
+                          onTap: () => _showCategoryDialog(context),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Category',
+                              border: const OutlineInputBorder(),
+                              filled: true,
+                              fillColor: AppColors.surfaceWhite,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _category,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Work',
-                              child: Text('Work'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Design',
-                              child: Text('Design'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Ideas',
-                              child: Text('Ideas'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Journal',
-                              child: Text('Journal'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _category = value;
-                              });
-                            }
-                          },
                         ),
                         const SizedBox(height: 18),
                         Row(
