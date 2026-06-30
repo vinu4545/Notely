@@ -15,16 +15,11 @@ class NoteProvider extends ChangeNotifier {
   late final DatabaseService _service;
   List<Note> _notes = [];
   List<NoteActivityEntry> _historyEntries = [];
-  List<String> _customCategories = [];
+  List<String> _categories = [];
   bool isLoading = true;
   String activeCategory = 'All';
 
-  static const List<String> defaultCategories = [
-    'Work',
-    'Design',
-    'Ideas',
-    'Journal',
-  ];
+  static const List<String> defaultCategories = ['Work', 'Travelling', 'Study'];
 
   List<Note> get notes => [..._notes];
 
@@ -45,19 +40,20 @@ class NoteProvider extends ChangeNotifier {
   List<NoteActivityEntry> get historyEntries => [..._historyEntries];
 
   List<String> get categories {
-    final items = <String>{};
-    items.add('All');
-    items.addAll(defaultCategories);
-    items.addAll(_customCategories);
-    items.addAll(activeNotes.map((note) => note.category));
-    return items.toList();
+    final items = <String>['All', ..._categories];
+    for (final category in activeNotes.map((note) => note.category)) {
+      if (!items.contains(category)) {
+        items.add(category);
+      }
+    }
+    return items;
   }
 
-  List<String> get availableCategories {
-    return categories.where((category) => category != 'All').toList();
-  }
+  List<String> get availableCategories => [..._categories];
 
-  List<String> get customCategories => [..._customCategories];
+  List<String> get customCategories => _categories
+      .where((category) => !defaultCategories.contains(category))
+      .toList();
 
   Future<void> initialize() async {
     await _loadSavedCategories();
@@ -81,44 +77,49 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> _loadSavedCategories() async {
     final preferences = await SharedPreferences.getInstance();
-    _customCategories =
-        preferences.getStringList(AppConstants.categoryPreferenceKey) ?? [];
+    _categories =
+        preferences.getStringList(AppConstants.categoryPreferenceKey) ??
+        defaultCategories;
+    if (_categories.isEmpty) {
+      _categories = defaultCategories;
+    }
   }
 
-  Future<void> _saveCustomCategories() async {
+  Future<void> _saveCategories() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setStringList(
       AppConstants.categoryPreferenceKey,
-      _customCategories,
+      _categories,
     );
   }
 
   Future<void> addCategory(String category) async {
     final normalized = category.trim();
     if (normalized.isEmpty || normalized == 'All') return;
-    if (defaultCategories.contains(normalized) ||
-        _customCategories.contains(normalized)) {
+    if (_categories.contains(normalized)) {
       return;
     }
-    _customCategories.add(normalized);
-    await _saveCustomCategories();
+    _categories.add(normalized);
+    await _saveCategories();
     notifyListeners();
   }
 
   Future<void> removeCategory(String category) async {
-    if (category.isEmpty || defaultCategories.contains(category)) return;
-    _customCategories.remove(category);
-    await _saveCustomCategories();
+    if (category.isEmpty || category == 'All') return;
+    if (!_categories.contains(category)) return;
+    _categories.remove(category);
+    await _saveCategories();
+
+    final fallbackCategory = _categories.isNotEmpty
+        ? _categories.first
+        : defaultCategories.first;
 
     final affectedNotes = _notes
         .where((note) => note.category == category)
         .toList();
     for (final note in affectedNotes) {
       await _service.updateNote(
-        note.copyWith(
-          category: defaultCategories.first,
-          updatedAt: DateTime.now(),
-        ),
+        note.copyWith(category: fallbackCategory, updatedAt: DateTime.now()),
       );
     }
     await loadNotes();
@@ -208,21 +209,58 @@ class NoteProvider extends ChangeNotifier {
   }
 
   Future<void> toggleFavorite(Note note) async {
+    if (note.id == null) return;
     final updated = note.copyWith(
       isFavorite: !note.isFavorite,
       updatedAt: DateTime.now(),
     );
     await _service.updateNote(updated);
+    await _service.logNoteActivity(
+      NoteActivityEntry(
+        noteId: note.id!,
+        action: note.isFavorite
+            ? 'Removed from favorites'
+            : 'Added to favorites',
+        details: note.isFavorite
+            ? 'Removed the note from favorites'
+            : 'Added the note to favorites',
+      ),
+    );
     await loadNotes();
   }
 
   Future<void> togglePin(Note note) async {
+    if (note.id == null) return;
     final updated = note.copyWith(
       isPinned: !note.isPinned,
       updatedAt: DateTime.now(),
     );
     await _service.updateNote(updated);
+    await _service.logNoteActivity(
+      NoteActivityEntry(
+        noteId: note.id!,
+        action: note.isPinned ? 'Unpinned' : 'Pinned',
+        details: note.isPinned
+            ? 'Removed the note from pinned'
+            : 'Pinned the note for quick access',
+      ),
+    );
     await loadNotes();
+  }
+
+  Future<void> markNoteAsVisited(Note note) async {
+    if (note.id == null) return;
+    final updated = note.copyWith(updatedAt: DateTime.now());
+    await _service.updateNote(updated);
+    await _service.logNoteActivity(
+      NoteActivityEntry(
+        noteId: note.id!,
+        action: 'Visited',
+        details: 'Viewed the note to continue working on it',
+      ),
+    );
+    await loadNotes();
+    await loadHistory();
   }
 
   Future<void> deletePermanently(Note note) async {

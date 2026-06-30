@@ -327,6 +327,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               case 'delete':
                                 await noteProvider.deleteNote(selectedNote);
                                 break;
+                              case 'favorite':
+                                await noteProvider.toggleFavorite(selectedNote);
+                                break;
+                              case 'pin':
+                                await noteProvider.togglePin(selectedNote);
+                                break;
+                              case 'lastVisited':
+                                final navigator = Navigator.of(context);
+                                await noteProvider.markNoteAsVisited(
+                                  selectedNote,
+                                );
+                                navigator.pushNamed(
+                                  AppRoutes.editor,
+                                  arguments: selectedNote,
+                                );
+                                break;
                               case 'history':
                                 Navigator.pushNamed(
                                   context,

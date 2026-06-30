@@ -213,9 +213,6 @@ class _EditorScreenState extends State<EditorScreen> {
                                 children: provider.availableCategories.map((
                                   category,
                                 ) {
-                                  final isDefault = NoteProvider
-                                      .defaultCategories
-                                      .contains(category);
                                   return Container(
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
@@ -237,26 +234,31 @@ class _EditorScreenState extends State<EditorScreen> {
                                           color: AppColors.textPrimary,
                                         ),
                                       ),
-                                      trailing: isDefault
-                                          ? null
-                                          : IconButton(
-                                              onPressed: () async {
-                                                await provider.removeCategory(
-                                                  category,
-                                                );
-                                                if (_category == category) {
-                                                  setState(() {
-                                                    _category = NoteProvider
+                                      trailing: IconButton(
+                                        onPressed: () async {
+                                          await provider.removeCategory(
+                                            category,
+                                          );
+                                          if (_category == category) {
+                                            setState(() {
+                                              _category =
+                                                  provider
+                                                      .availableCategories
+                                                      .isNotEmpty
+                                                  ? provider
+                                                        .availableCategories
+                                                        .first
+                                                  : NoteProvider
                                                         .defaultCategories
                                                         .first;
-                                                  });
-                                                }
-                                              },
-                                              icon: const Icon(
-                                                Icons.delete_outline,
-                                                color: AppColors.error,
-                                              ),
-                                            ),
+                                            });
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: AppColors.error,
+                                        ),
+                                      ),
                                     ),
                                   );
                                 }).toList(),

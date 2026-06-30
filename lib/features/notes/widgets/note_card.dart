@@ -92,8 +92,8 @@ class _NoteCardState extends State<NoteCard> {
                             await widget.onActionSelected!(widget.note, value);
                           }
                         },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
                             value: 'history',
                             child: Row(
                               children: [
@@ -103,7 +103,7 @@ class _NoteCardState extends State<NoteCard> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          const PopupMenuItem(
                             value: 'archive',
                             child: Row(
                               children: [
@@ -113,13 +113,55 @@ class _NoteCardState extends State<NoteCard> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          const PopupMenuItem(
                             value: 'delete',
                             child: Row(
                               children: [
                                 Icon(Icons.delete_outline),
                                 SizedBox(width: 8),
                                 Text('Delete'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'favorite',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  widget.note.isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_outline,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.note.isFavorite
+                                      ? 'Unfavorite'
+                                      : 'Favorite',
+                                ),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'lastVisited',
+                            child: Row(
+                              children: [
+                                Icon(Icons.access_time_outlined),
+                                SizedBox(width: 8),
+                                Text('Last visited'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'pin',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  widget.note.isPinned
+                                      ? Icons.push_pin
+                                      : Icons.push_pin_outlined,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(widget.note.isPinned ? 'Unpin' : 'Pin'),
                               ],
                             ),
                           ),
