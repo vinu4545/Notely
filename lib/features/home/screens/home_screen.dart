@@ -52,12 +52,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              noteProvider.greeting(),
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textSecondary,
+                            ShaderMask(
+                              blendMode: BlendMode.srcIn,
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [
+                                  AppColors.primaryPink,
+                                  AppColors.primaryOrange,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ).createShader(
+                                Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                              ),
+                              child: Text(
+                                noteProvider.greeting(),
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 6),

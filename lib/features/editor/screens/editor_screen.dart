@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/app_routes.dart';
@@ -393,20 +394,23 @@ class _EditorScreenState extends State<EditorScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Capture your next idea',
-                        style: TextStyle(
-                          fontSize: 24,
+                        style: GoogleFonts.lora(
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.4,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
                         'Markdown support, live preview, stats, and smooth interaction.',
-                        style: TextStyle(
+                        style: GoogleFonts.lora(
                           fontSize: 14,
                           color: AppColors.textSecondary,
+                          height: 1.5,
                         ),
                       ),
                     ],
@@ -428,13 +432,17 @@ class _EditorScreenState extends State<EditorScreen> {
                         TextFormField(
                           controller: _titleController,
                           validator: Validators.validateTitle,
-                          style: const TextStyle(
+                          style: GoogleFonts.lora(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Title',
                             hintText: 'Start with a memorable headline',
+                            hintStyle: GoogleFonts.lora(
+                              fontSize: 18,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 18),
