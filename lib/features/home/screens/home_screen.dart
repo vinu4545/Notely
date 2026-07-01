@@ -54,16 +54,22 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             ShaderMask(
                               blendMode: BlendMode.srcIn,
-                              shaderCallback: (bounds) => const LinearGradient(
-                                colors: [
-                                  AppColors.primaryPink,
-                                  AppColors.primaryOrange,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ).createShader(
-                                Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                              ),
+                              shaderCallback: (bounds) =>
+                                  const LinearGradient(
+                                    colors: [
+                                      AppColors.primaryPink,
+                                      AppColors.primaryOrange,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ).createShader(
+                                    Rect.fromLTWH(
+                                      0,
+                                      0,
+                                      bounds.width,
+                                      bounds.height,
+                                    ),
+                                  ),
                               child: Text(
                                 noteProvider.greeting(),
                                 style: GoogleFonts.inter(
