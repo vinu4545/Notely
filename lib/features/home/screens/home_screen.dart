@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide SearchBar;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/router/app_routes.dart';
@@ -53,19 +54,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               noteProvider.greeting(),
-                              style: const TextStyle(
+                              style: GoogleFonts.inter(
                                 fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               'Your modern workspace',
-                              style: const TextStyle(
+                              style: GoogleFonts.inter(
                                 fontSize: 34,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w900,
                                 color: AppColors.textPrimary,
+                                letterSpacing: -0.6,
                               ),
                             ),
                           ],
@@ -246,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    height: 122,
+                    height: 140,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: 3,

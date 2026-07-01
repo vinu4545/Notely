@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../notes/providers/note_provider.dart';
 import '../../notes/widgets/note_card.dart';
@@ -67,9 +68,32 @@ class NoteListScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.pushNamed(
                           context,
-                          '/editor',
+                          AppRoutes.editor,
                           arguments: note,
                         );
+                      },
+                      onActionSelected: (selectedNote, action) async {
+                        switch (action) {
+                          case 'archive':
+                            await provider.archiveNote(selectedNote);
+                            break;
+                          case 'delete':
+                            await provider.deleteNote(selectedNote);
+                            break;
+                          case 'favorite':
+                            await provider.toggleFavorite(selectedNote);
+                            break;
+                          case 'pin':
+                            await provider.togglePin(selectedNote);
+                            break;
+                          case 'history':
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.history,
+                              arguments: selectedNote,
+                            );
+                            break;
+                        }
                       },
                     );
                   },

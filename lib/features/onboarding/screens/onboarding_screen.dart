@@ -68,19 +68,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     children: const [
                       _OnboardingStep(
-                        imageAsset: 'assets/onboarding_1.png',
+                        imageAsset: 'assets/logo.png',
                         title: 'A workspace that feels refined',
                         description:
                             'Modern gradients, glass panels, and thoughtful motion make every moment feel elevated.',
                       ),
                       _OnboardingStep(
-                        imageAsset: 'assets/onboarding_2.png',
+                        imageAsset: 'assets/logo.png',
                         title: 'Write, organize, and review',
                         description:
                             'Create notes, pin your focus items, archive ideas, and search instantly with intelligent filters.',
                       ),
                       _OnboardingStep(
-                        imageAsset: 'assets/onboarding_3.png',
+                        imageAsset: 'assets/logo.png',
                         title: 'Built for speed and clarity',
                         description:
                             'Minimal distractions, smooth navigation, and responsive layouts across mobile, desktop and tablet.',

@@ -7,7 +7,7 @@ class AppTextTheme {
   AppTextTheme._();
 
   static TextTheme get textTheme {
-    return GoogleFonts.plusJakartaSansTextTheme(
+    return GoogleFonts.interTextTheme(
       const TextTheme(
         displayLarge: TextStyle(
           fontSize: 48,

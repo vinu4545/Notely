@@ -53,7 +53,30 @@ class _EditorScreenState extends State<EditorScreen> {
     super.dispose();
   }
 
+  Future<void> _showTitleRequiredDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Add a title'),
+          content: const Text('Add a title before saving your note.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Got it'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _saveNote() async {
+    if (_titleController.text.trim().isEmpty) {
+      await _showTitleRequiredDialog();
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     final note = Note(
@@ -102,6 +125,7 @@ class _EditorScreenState extends State<EditorScreen> {
   Future<void> _showCategoryDialog(BuildContext context) async {
     final provider = context.read<NoteProvider>();
     final controller = TextEditingController();
+    final deletingCategories = <String>{};
     final selected = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
@@ -113,6 +137,7 @@ class _EditorScreenState extends State<EditorScreen> {
           ),
           child: StatefulBuilder(
             builder: (_, setDialogState) {
+              final categories = provider.availableCategories.toList();
               return Container(
                 decoration: BoxDecoration(
                   color: AppColors.surface,
@@ -210,55 +235,81 @@ class _EditorScreenState extends State<EditorScreen> {
                             constraints: const BoxConstraints(maxHeight: 280),
                             child: SingleChildScrollView(
                               child: Column(
-                                children: provider.availableCategories.map((
-                                  category,
-                                ) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceWhite,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: AppColors.border,
+                                children: categories.map((category) {
+                                  final isDeleting = deletingCategories
+                                      .contains(category);
+                                  return ClipRect(
+                                    child: AnimatedSize(
+                                      duration: const Duration(
+                                        milliseconds: 220,
                                       ),
-                                    ),
-                                    child: ListTile(
-                                      onTap: () => Navigator.of(
-                                        dialogContext,
-                                      ).pop(category),
-                                      title: Text(
-                                        category,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      trailing: IconButton(
-                                        onPressed: () async {
-                                          await provider.removeCategory(
-                                            category,
-                                          );
-                                          if (_category == category) {
-                                            setState(() {
-                                              _category =
-                                                  provider
-                                                      .availableCategories
-                                                      .isNotEmpty
-                                                  ? provider
-                                                        .availableCategories
-                                                        .first
-                                                  : NoteProvider
-                                                        .defaultCategories
-                                                        .first;
-                                            });
-                                          }
-                                        },
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: AppColors.error,
-                                        ),
-                                      ),
+                                      curve: Curves.easeInOut,
+                                      child: isDeleting
+                                          ? const SizedBox.shrink()
+                                          : Container(
+                                              margin: const EdgeInsets.only(
+                                                bottom: 12,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.surfaceWhite,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                border: Border.all(
+                                                  color: AppColors.border,
+                                                ),
+                                              ),
+                                              child: ListTile(
+                                                onTap: () => Navigator.of(
+                                                  dialogContext,
+                                                ).pop(category),
+                                                title: Text(
+                                                  category,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                                ),
+                                                trailing: IconButton(
+                                                  onPressed: () async {
+                                                    setDialogState(() {
+                                                      deletingCategories.add(
+                                                        category,
+                                                      );
+                                                    });
+                                                    await Future.delayed(
+                                                      const Duration(
+                                                        milliseconds: 220,
+                                                      ),
+                                                    );
+                                                    await provider
+                                                        .removeCategory(
+                                                          category,
+                                                        );
+                                                    if (_category == category) {
+                                                      setState(() {
+                                                        _category =
+                                                            provider
+                                                                .availableCategories
+                                                                .isNotEmpty
+                                                            ? provider
+                                                                  .availableCategories
+                                                                  .first
+                                                            : NoteProvider
+                                                                  .defaultCategories
+                                                                  .first;
+                                                      });
+                                                    }
+                                                    setDialogState(() {});
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.delete_outline,
+                                                    color: AppColors.error,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                     ),
                                   );
                                 }).toList(),
@@ -571,10 +622,11 @@ class _EditorBadge extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             value,
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),

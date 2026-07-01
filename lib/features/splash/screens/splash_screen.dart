@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
-    _navigationTimer = Timer(const Duration(milliseconds: 2000), () {
+    _navigationTimer = Timer(const Duration(milliseconds: 4000), () {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
     });

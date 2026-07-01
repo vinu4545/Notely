@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_radius.dart';
@@ -18,7 +19,7 @@ class StatisticsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: AppRadius.lg,
@@ -35,7 +36,7 @@ class StatisticsCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
@@ -45,7 +46,7 @@ class StatisticsCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -55,9 +56,10 @@ class StatisticsCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             caption,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary,
+              height: 1.2,
             ),
             overflow: TextOverflow.ellipsis,
           ),

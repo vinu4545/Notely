@@ -155,6 +155,14 @@ class NoteProvider extends ChangeNotifier {
     await loadHistory();
   }
 
+  void _replaceLocalNote(Note updatedNote) {
+    final index = _notes.indexWhere((note) => note.id == updatedNote.id);
+    if (index != -1) {
+      _notes[index] = updatedNote;
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteNote(Note note) async {
     if (note.id == null) return;
     final updated = note.copyWith(
@@ -162,6 +170,7 @@ class NoteProvider extends ChangeNotifier {
       isArchived: false,
       updatedAt: DateTime.now(),
     );
+    _replaceLocalNote(updated);
     await _service.updateNote(updated);
     await _service.logNoteActivity(
       NoteActivityEntry(
@@ -177,6 +186,7 @@ class NoteProvider extends ChangeNotifier {
   Future<void> archiveNote(Note note) async {
     if (note.id == null) return;
     final updated = note.copyWith(isArchived: true, updatedAt: DateTime.now());
+    _replaceLocalNote(updated);
     await _service.updateNote(updated);
     await _service.logNoteActivity(
       NoteActivityEntry(
@@ -214,6 +224,7 @@ class NoteProvider extends ChangeNotifier {
       isFavorite: !note.isFavorite,
       updatedAt: DateTime.now(),
     );
+    _replaceLocalNote(updated);
     await _service.updateNote(updated);
     await _service.logNoteActivity(
       NoteActivityEntry(
@@ -235,6 +246,7 @@ class NoteProvider extends ChangeNotifier {
       isPinned: !note.isPinned,
       updatedAt: DateTime.now(),
     );
+    _replaceLocalNote(updated);
     await _service.updateNote(updated);
     await _service.logNoteActivity(
       NoteActivityEntry(
